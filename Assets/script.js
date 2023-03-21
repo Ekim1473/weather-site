@@ -25,7 +25,9 @@ fetch(QueryUrl)
 })
 
 .then(function (data){
-  var day1 = (data);
+  var city = (data.city);
+  var weather = (data.weather);
+console.log(data.city);
 console.log(data);
 })
 });
