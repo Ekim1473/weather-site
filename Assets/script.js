@@ -5,6 +5,7 @@ var resultContentEl = document.querySelector('#result-content');
 var searchFormEl = document.querySelector('#search-form');
 var citiesSearched = document.querySelector('#cities-searched');
 
+
 //api search link to be added
 
  //geocode api 
@@ -12,12 +13,10 @@ var locQueryUrl = "http://api.openweathermap.org/geo/1.0/direct?q=London&limit=1
 fetch(locQueryUrl)
 .then(function(response){
   return response.json();
-}) 
-
-.then(function (data){
+}).then(function (data){
   var lat = (data[0].lat);
   var lon = (data[0].lon);
-  var QueryUrl = 'http://api.openweathermap.org/data/2.5/forecast?lat='+lat+'&lon='+lon+'&appid=9efdde7b3842ea6810258c0ef65cd389';
+  var QueryUrl = 'http://api.openweathermap.org/data/2.5/forecast?lat='+lat+'&lon='+lon+'&appid=9efdde7b3842ea6810258c0ef65cd389&exclude=hourly';
 fetch(QueryUrl)
 
 .then(function (response){
@@ -29,8 +28,81 @@ fetch(QueryUrl)
   var weather = (data.weather);
 console.log(data.city);
 console.log(data);
+$('#headCityName').html(data.city.name+" - "+data.city.country);
+renderForecast(data.list)
 })
 });
+
+function handleFormSubmit(event) {
+  event.preventDefault();
+
+  var citiesSearched = $('input[name="city-input"]').val();
+
+  if (!citiesSearched) {
+    console.log('No Cities Searched');
+    return;
+  }
+
+  var searchFormEl = $(
+    '<li class="flex-row justify-space-between align-center p-2 bg-light text-dark">'
+  );
+  searchFormEl.text(citiesSearched);
+
+  // add delete button to remove shopping list item
+  citiesSearchedEl.append(
+    '<button class="btn btn-danger btn-small delete-item-btn">Remove</button>'
+  );
+
+  // print to the page
+  citiesSearchedEl.append(citiesSearchedEl);
+
+  // clear the form input element
+  $('input[name="cities-input"]').val('');
+}
+
+
+//display 5 day forecast
+function renderForecast (dailyforcast){
+ 
+  var forcastContainer = document.getElementById('dvForcastContainer')
+  var startDt = dayjs().add(1, 'day').startOf('day').unix();
+  var endDt = dayjs().add(6, 'day').startOf('day').unix();
+
+  var headingCol = document.createElement('div');
+  var heading = document.createElement('h4');
+
+  headingCol.setAttribute('class', 'col-12');
+  heading.textContent = '5-Day Forecast:';
+  headingCol.append(heading);
+
+  forcastContainer.innerHTML = '';
+  forcastContainer.append(headingCol);
+var html = "<div class='row'>";
+
+  for (var i = 0; i < dailyforcast.length; i++) {
+
+    if (dailyforcast [i].dt >= startDt && dailyforcast[i].dt < endDt) {
+
+      if (dailyforcast[i].dt_txt.slice(11, 13) == "12") {
+        //renderForecastCard(dailyforcast[i]);
+        html+=`<div class="col-3" style="border:1px solid #000">
+        
+        <strong>Date</strong>
+        <p>${dailyforcast[i].dt_txt.replace('12:00:00','')}</p>
+        <strong>Max Temp</strong>
+        <p>${dailyforcast[i].main.temp_max}</p>
+        <strong>Min Temp</strong> 
+        <p>${dailyforcast[i].main.temp_min}</p>
+        <img>${dailyforcast[i].main.weather}</img>
+      
+        </div>`
+      }
+    }
+  }
+  
+  html += "</div>";
+  $('#dvForcastContainer').html(html);
+}
     
     //fetching the API parameters:
      function displayWeather (data) {
@@ -102,33 +174,7 @@ console.log(data);
 
 
 
-function handleFormSubmit(event) {
-    event.preventDefault();
-  
-    var citiesSearched = $('input[name="city-input"]').val();
-  
-    if (!citiesSearched) {
-      console.log('No Cities Searched');
-      return;
-    }
-  
-    var searchFormEl = $(
-      '<li class="flex-row justify-space-between align-center p-2 bg-light text-dark">'
-    );
-    searchFormEl.text(citiesSearched);
-  
-    // add delete button to remove shopping list item
-    citiesSearchedEl.append(
-      '<button class="btn btn-danger btn-small delete-item-btn">Remove</button>'
-    );
-  
-    // print to the page
-    citiesSearchedEl.append(citiesSearchedEl);
-  
-    // clear the form input element
-    $('input[name="cities-input"]').val('');
-  }
-  
+
   // TODO: Create a function to handle removing a list item when `.delete-item-btn` is clicked
   
   // TODO: Use event delegation and add an event listener to `shoppingListEl` to listen for a click event on any element with a class of `.delete-item-btn` and execute the function created above
